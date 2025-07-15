@@ -149,3 +149,178 @@
 
 ---
 
+## 🔹 180. EAI (Enterprise Application Integration)
+
+#### 📘 정의
+EAI는 **기업 내 이기종 애플리케이션 및 시스템 간 데이터를 전달·연계·통합**할 수 있도록 지원하는 아키텍처 또는 솔루션이다 :contentReference[oaicite:1]{index=1}.
+
+#### 🧩 주요 목적
+- 이기종 시스템 간 **자동화된 데이터 공유 및 프로세스 연결**
+- **중복 데이터 제거 및 일관성 확보**
+- **업무 효율 향상 및 실시간 정보 제공** :contentReference[oaicite:2]{index=2}
+
+#### 🧩 구성 요소
+| 구성 요소            | 설명 |
+|---------------------|------|
+| **플랫폼(EAI Platform)** | 연계 통신, 메시지 큐 및 워크플로우 관리 :contentReference[oaicite:3]{index=3} |
+| **어댑터(Adapter)**     | 각 시스템의 인터페이스 연결 모듈 :contentReference[oaicite:4]{index=4} |
+| **브로커(Broker)**     | 메시지 라우팅·포맷·코드 변환 처리 :contentReference[oaicite:5]{index=5} |
+| **메시지 큐(Message Queue)** | 비동기 통신 시 메시지 저장 및 전달 매체 :contentReference[oaicite:6]{index=6} |
+| **워크플로우(Workflow)** | 비즈니스 프로세스 기반의 자동화 작업 :contentReference[oaicite:7]{index=7} |
+
+#### 🧩 구축 유형
+1. **Point‑to‑Point**: 시스템 간 1:1 직접 연동 (간단하지만 변경·재사용 어려움) :contentReference[oaicite:8]{index=8}
+2. **Hub & Spoke**: 중앙 허브 통한 연계 (중앙 장애 시 전체 영향) :contentReference[oaicite:9]{index=9}
+3. **Message Bus**: 메시지 버스를 통한 분산 연계 (확장성·대용량 처리 유리) :contentReference[oaicite:10]{index=10}
+4. **Hybrid**: 허브-스포크와 메시지 버스 혼합 (유연성 높음) :contentReference[oaicite:11]{index=11}
+
+#### 📝 기출 포맷 예시
+- Hub & Spoke 방식의 장·단점은?
+- 어댑터(Adapter)의 역할은?
+- Message Bus 구조의 주요 특징은?
+
+#### 🧠 용어 설명
+- **EAI**: 이기종 시스템 간 정보 전달·연계·통합 솔루션 :contentReference[oaicite:12]{index=12}
+- **어댑터**: 시스템 별 인터페이스를 표준화하는 변환 모듈 :contentReference[oaicite:13]{index=13}
+- **브로커**: 메시지를 적절히 라우팅하고 포맷을 변환하는 중계자 :contentReference[oaicite:14]{index=14}
+- **워크플로우**: 업무 흐름에 따라 메시지 전송·처리 자동화 :contentReference[oaicite:15]{index=15}
+- **Point‑to‑Point**, **Hub & Spoke**, **Message Bus**, **Hybrid**: 주요 구축 방식 명칭과 구분 :contentReference[oaicite:16]{index=16}
+
+---
+
+## 🔹 181. ESB (Enterprise Service Bus)
+
+#### 📘 정의
+ESB는 **서비스 중심 통합을 지원하는 메시지 버스 기반 통합 플랫폼**으로,  
+EAI 대비 더 높은 **유연성 및 느슨한 결합(loose coupling)**을 지향하며,  
+버스(bus) 구조를 통해 서비스 중심 통신을 수행한다 :contentReference[oaicite:1]{index=1}.
+-> 표준 기반의 인터페이스 제공
+
+#### 🧩 주요 특징
+
+- **서비스 중심 통합**  
+  → 애플리케이션 대신 **서비스 단위**로 구성된 기능을 버스 위에서 연계 :contentReference[oaicite:2]{index=2}.
+
+- **느슨한 결합 구조 (Loosely Coupled)**  
+  → 프로토콜 호환성을 유지하며, 특정 서비스 변경 시 다른 서비스에 영향 미치지 않음 :contentReference[oaicite:3]{index=3}.
+
+- **확장성과 유연성**  
+  → 메시지 버스 기반 구조로 더욱 **확장성이 높고 유연함** :contentReference[oaicite:4]{index=4}.
+
+- **표준·분산 환경 지원**  
+  → 웹 서비스, XML 등 개방형 표준을 활용하고 내부망·외부망 연계 모두 가능 :contentReference[oaicite:5]{index=5}.
+
+#### 🧩 ESB 구성 요소
+
+| 구성 요소            | 설명 |
+|---------------------|------|
+| **버스(Bus)**         | 메시지 전송 통로 역할, 서비스 간 메시지 교환 지원 |
+| **서비스(Service)**    | 독립적인 기능 단위, 재사용 가능 |
+| **브로커(Router)**    | 서비스 호출 라우팅 및 프로토콜 매핑 |
+| **메시지 변환기**     | 다양한 메시지 포맷 간 변환 (예: XML ↔ JSON) |
+| **레지스트리(Registry)** | 서비스 메타데이터 및 엔드포인트 저장소 |
+
+*구성 요소는 웹 블로그에서 직접 나열된 것은 아니지만, 메시지 버스·라우터·포맷변환·표준 기반 부분이 언급됨 :contentReference[oaicite:6]{index=6}.*
+
+#### 🧩 ESB vs EAI
+
+| 항목         | EAI                                  | ESB                                     |
+|--------------|--------------------------------------|-----------------------------------------|
+| **핵심 개념** | 애플리케이션 중심 통합              | **서비스 중심 통합** :contentReference[oaicite:7]{index=7} |
+| **결합도**    | 비교적 높음 (허브 중심)             | **낮음 (느슨한 결합)** :contentReference[oaicite:8]{index=8} |
+| **토폴로지** | Point‑to‑Point, Hub & Spoke 등      | **메시지 버스 기반 분산 구조** :contentReference[oaicite:9]{index=9} |
+| **기술 스택** | 어댑터, 브로커, 메시지 큐          | **웹 서비스, 지능형 라우터, 표준 포맷** :contentReference[oaicite:10]{index=10} |
+| **적용 범위** | 기업 내부망 중심                   | **기업 내부 + 외부 서비스 연계** :contentReference[oaicite:11]{index=11} |
+
+#### 📝 기출 포맷 예시
+
+- ESB의 주요 특징으로 옳은 것은?
+- ESB와 EAI의 차이점을 설명하시오.
+- 메시지 버스 기반 통합의 장점은 무엇인가?
+
+#### 🧠 용어 설명
+
+- **ESB**: 서비스 중심 메시지 버스 기반 통합 플랫폼
+- **느슨한 결합**: 서비스 변경 시 다른 서비스 영향 최소화
+- **메시지 버스**: 서비스를 연결하는 통신 채널
+- **브로커/라우터**: 요청을 적합한 서비스로 전달하는 중개 컴포넌트  
+
+---
+
+## 🔹 182. JSON
+
+#### 📘 정의
+JSON(JavaScript Object Notation)은 **속성-값 쌍(key-value pairs)으로 데이터를 표현하는, 사람이 읽을 수 있는 경량 텍스트 기반의 개방형 표준 포맷**이다.  
+AJAX 기반 웹 애플리케이션에서 **XML을 대체**하며, 다양한 언어와 플랫폼 간 데이터 교환에 널리 사용된다 :contentReference[oaicite:1]{index=1}.
+
+#### 🧩 주요 특징
+
+- **키-값 구조**로 간단하고 직관적인 형태 :contentReference[oaicite:2]{index=2}
+- **경량 포맷**으로 XML보다 가볍고 빠름 :contentReference[oaicite:3]{index=3}
+- **언어 독립성**: JSON 문법은 여러 언어에서 손쉽게 파싱 및 생성 가능 :contentReference[oaicite:4]{index=4}
+- **사람 및 기계 가독성**이 우수 :contentReference[oaicite:5]{index=5}
+
+#### 🧩 데이터 유형
+
+- **원시값**: 숫자, 문자열, Boolean, null
+- **구조값**: 배열 ([]) 또는 객체 ({}) :contentReference[oaicite:6]{index=6}
+
+#### 📝 기출 포맷 예시
+
+- JSON의 데이터 표현 방식은 무엇인가?
+- JSON이 XML보다 선호되는 이유를 설명하시오.
+- JSON과 XML의 차이는 무엇인가?
+
+#### 🧠 용어 설명
+
+- **경량 포맷**: 전송 시 데이터 양이 적어 빠른 처리 가능
+- **언어 독립적**: 특정 언어에 종속되지 않는 표준 포맷
+- **키-값 구조**: 문자열 키와 해당 값을 짝으로 구성
+
+---
+
+## 🔹 183. AJAX (Asynchronous JavaScript And XML)
+
+#### 📘 정의
+AJAX는 **웹 페이지 전체를 다시 로드하지 않고도 서버와 비동기적으로 데이터를 주고받는 기술**이다.  
+자바스크립트와 XMLHttpRequest 객체를 활용하여,  
+사용자와의 상호작용에 따라 **필요한 부분만 동적으로 갱신**할 수 있게 한다.
+
+#### 🧩 주요 특징
+
+- **비동기 통신 지원**  
+  → 사용자가 웹 페이지를 보는 도중에도 서버와 데이터를 주고받을 수 있음
+
+- **페이지 새로고침 없이 화면 일부 갱신**  
+  → 전체 페이지 reload 없이, 필요한 데이터만 업데이트
+
+- **XML뿐 아니라 JSON 등 다양한 포맷 지원**  
+  → 초창기에는 XML 사용, 현재는 경량 포맷인 **JSON이 더 일반적**
+
+- **사용자 경험 향상**  
+  → 반응 속도 향상, 부드러운 UI 제공
+
+#### 🧩 구성 기술 요소
+
+| 요소            | 설명 |
+|-----------------|------|
+| **HTML/CSS**     | 웹 페이지 구조와 스타일 구성 |
+| **DOM**          | 문서 객체 모델, HTML 요소 접근 및 제어 |
+| **JavaScript**   | 동작 구현 및 이벤트 처리 |
+| **XMLHttpRequest** | 비동기 서버 통신 수행 |
+| **데이터 포맷**   | XML, JSON, 텍스트 등 다양한 데이터 처리
+
+#### 📝 기출 포맷 예시
+
+- AJAX의 주요 특징으로 옳지 않은 것은?
+- AJAX가 제공하는 사용자 경험상의 이점은 무엇인가?
+- 다음 중 AJAX 구성 요소에 해당하지 않는 것은?
+
+#### 🧠 용어 설명
+
+- **AJAX**: 자바스크립트를 이용해 웹 페이지 일부를 서버와 비동기 통신으로 갱신하는 기술
+- **비동기 통신**: 요청과 응답이 동시에 일어나지 않으며, 사용자 흐름을 차단하지 않는 방식
+- **XMLHttpRequest**: AJAX의 핵심 객체, 서버 요청 및 응답 처리
+- **JSON**: AJAX에서 주로 사용되는 경량 데이터 포맷
+- **DOM**: 웹 페이지 구조를 트리 형태로 표현하는 모델
+
