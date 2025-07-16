@@ -889,11 +889,11 @@
 
 | 지표명 | 영어 | 설명 |
 |--------|------|------|
-| **응답 시간** | Response Time | 사용자의 요청 후 응답이 시작되기까지의 시간. 네트워크 지연, 서버 처리 시간 등을 포함 :contentReference[oaicite:1]{index=1} |
-| **처리량** | Throughput | 단위 시간당 시스템이 처리하는 작업 수 (예: TPS) :contentReference[oaicite:2]{index=2} |
-| **경과 시간** | Turnaround Time | 작업 요청 시점부터 최종 출력 완료까지의 전체 소요 시간 :contentReference[oaicite:3]{index=3} |
-| **자원 사용률** | Resource Utilization | CPU, 메모리, 네트워크 등 자원이 실제 얼마나 사용되는지 비율로 측정 :contentReference[oaicite:4]{index=4} |
-| **가용성** | Availability | 시스템이 정상적으로 서비스된 시간의 비율로, SLA 준수 판단 기준 :contentReference[oaicite:5]{index=5} |
+| **응답 시간** | Response Time | 사용자의 요청 후 응답이 시작되기까지의 시간. 네트워크 지연, 서버 처리 시간 등을 포함  |
+| **처리량** | Throughput | 단위 시간당 시스템이 처리하는 작업 수 (예: TPS)  |
+| **경과 시간** | Turnaround Time | 작업 요청 시점부터 최종 출력 완료까지의 전체 소요 시간 |
+| **자원 사용률** | Resource Utilization | CPU, 메모리, 네트워크 등 자원이 실제 얼마나 사용되는지 비율로 측정 |
+| **가용성** | Availability | 시스템이 정상적으로 서비스된 시간의 비율로, SLA 준수 판단 기준 |
 
 #### 🧩 출제 포인트
 - **응답 시간 vs 처리량 vs 경과 시간**의 개념 및 차이
@@ -959,20 +959,20 @@
 
 - **V(G) = E – N + 2**
     - E = 제어 흐름 그래프의 간선(Edge) 수
-    - N = 노드(Node) 수 :contentReference[oaicite:1]{index=1}
+    - N = 노드(Node) 수 
 - 또는 **V(G) = P + 1**
-    - P = 분기문(if, for, while 등)의 개수 :contentReference[oaicite:2]{index=2}
+    - P = 분기문(if, for, while 등)의 개수
 - 또 하나: 영역 수(R) 기반 계산
-    - V(G) = R (제어 흐름 그래프의 영역 개수) :contentReference[oaicite:3]{index=3}
+    - V(G) = R (제어 흐름 그래프의 영역 개수) 
 
 #### 🧩 주요 의미 및 활용
 
-- **독립 실행 경로 수** = 필요한 최소 테스트 케이스 수 :contentReference[oaicite:4]{index=4}
-- 복잡도가 높을수록 유지보수성 저하, 결함 확률 증가 :contentReference[oaicite:5]{index=5}
+- **독립 실행 경로 수** = 필요한 최소 테스트 케이스 수 
+- 복잡도가 높을수록 유지보수성 저하, 결함 확률 증가 
 - 일반적인 기준:
     - V ≤ 10: 단순
     - 10 < V ≤ 20: 중간
-    - V > 20: 복잡 :contentReference[oaicite:6]{index=6}
+    - V > 20: 복잡 
 
 #### 📝 출제 포인트
 - 순환 복잡도 계산식 공식 및 활용 방법
@@ -1039,16 +1039,16 @@
 
 #### 🧩 핵심 원칙 (정처기 + 국내 자료 기준)
 
-| 원칙 | 설명 |
-|------|------|
-| **가독성 (Readability)** | 이해하기 쉬운 용어와 들여쓰기 유지 :contentReference[oaicite:2]{index=2} |
-| **단순성 (Simplicity)** | 함수·클래스는 **한 가지 기능만 수행**, 작고 간결하게 :contentReference[oaicite:3]{index=3} |
-| **의존성 배제 (Low Dependency)** | 다른 모듈에 미치는 영향을 최소화 :contentReference[oaicite:4]{index=4} |
-| **중복 제거 (DRY: Don’t Repeat Yourself)** | 중복된 코드를 줄여 유지보수성 향상 :contentReference[oaicite:5]{index=5} |
-| **추상화 (Abstraction)** | 동일 수준의 추상화 유지, 상세 구현은 하위 모듈에서 담당 :contentReference[oaicite:6]{index=6} |
+| 원칙 | 설명                                                                     |
+|------|------------------------------------------------------------------------|
+| **가독성 (Readability)** | 이해하기 쉬운 용어와 들여쓰기 유지                                                    |
+| **단순성 (Simplicity)** | 함수·클래스는 **한 가지 기능만 수행**, 작고 간결하게  |
+| **의존성 배제 (Low Dependency)** | 다른 모듈에 미치는 영향을 최소화               |
+| **중복 제거 (DRY: Don’t Repeat Yourself)** | 중복된 코드를 줄여 유지보수성 향상              |
+| **추상화 (Abstraction)** | 동일 수준의 추상화 유지, 상세 구현은 하위 모듈에서 담당  |
 
 #### 📝 시험 출제 포인트
-- 다수 기출: “클린 코드 5가지 항목 쓰시오” → *가독성, 단순성, 의존성 배제, 중복 제거, 추상화* :contentReference[oaicite:9]{index=9}
+- 다수 기출: “클린 코드 5가지 항목 쓰시오” → *가독성, 단순성, 의존성 배제, 중복 제거, 추상화*
 - DRY·단일 책임 강조 문제
 
 #### 🧠 용어 요약
@@ -1056,3 +1056,36 @@
 - **Simplicity**: 불필요한 복잡성 제거
 - **Abstraction**: 상위 기능은 간결히, 세부는 숨기기
 - **DRY**: 코드 중복 방지  
+
+---
+
+## 🔹 229. 소스 코드 품질 분석 도구 (Source Code Quality Analysis Tools)
+
+#### 📘 정의
+소스 코드 품질 분석 도구는 **코드를 실행하지 않고도 소스 코드의 구조, 스타일, 복잡도, 오류 가능성 등을 분석**하여  
+개발 초기 단계에서 품질 문제를 조기에 발견하고 예방할 수 있도록 지원하는 도구입니다.
+
+#### 🧩 주요 도구 유형 및 예시
+
+| 유형 | 설명 | 대표 도구 |
+|------|------|-----------|
+| **정적 분석 도구** | 코드를 실행하지 않고 분석하여, 문법 오류, 복잡도, 스타일, 보안 취약점 등을 점검 | SonarQube, PMD, cppcheck, checkstyle, Cobertura |
+| **동적 분석 도구** | 프로그램 실행 중 동작을 분석하여, 런타임 오류, 메모리 누수, 스레드 문제 등을 점검 | Valgrind, Purify, JProfiler |
+
+#### 🧩 활용 목적 및 장점
+- **코딩 표준 준수 여부** 자동 점검
+- **복잡도 및 중복 코드 탐지**로 유지보수성 향상
+- **코드 품질 향상**을 통한 소프트웨어 신뢰성 확보
+- **메모리 누수/스레드 이슈** 등 사전 검출 가능
+
+#### 📝 기출 포맷 예시
+- 다음 중 정적 분석 도구에 해당하는 것은?
+- cppcheck의 목적은 무엇인가?
+- 소스 코드 품질 분석 도구의 필요성으로 옳지 않은 것은?
+
+#### 🧠 용어 설명
+- **정적 분석 도구 (Static Analysis Tool)**: 코드 실행 없이 소스 코드를 분석
+- **동적 분석 도구 (Dynamic Analysis Tool)**: 프로그램 실행 중 동작을 분석
+- **SonarQube**: 코드 중복, 복잡도, 보안 결함 등을 종합적으로 분석
+- **PMD**: Java 코드의 불필요한 객체, 복잡한 표현식, 스타일 위반 등 검사
+- **cppcheck**: C/C++ 코드의 버그, 메모리 오류, 경고 탐지에 특화된 도구
