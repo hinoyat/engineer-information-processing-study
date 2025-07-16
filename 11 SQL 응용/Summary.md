@@ -911,8 +911,6 @@ UPDATE 학생 SET 장학금 =
 
 ---
 
-# 🎯 SQL 응용 - SELECT 기본 완전정리
-
 ## 🔹 243. SELECT
 
 #### 📘 정의
@@ -1301,3 +1299,591 @@ ORDER BY 학생수 DESC;
 - **ASC**: 오름차순 정렬 (기본값)
 - **DESC**: 내림차순 정렬
 - **다중 정렬**: 여러 컬럼을 기준으로 하는 정렬
+
+---
+
+## 🔹 247. 하위 질의 (서브쿼리)
+
+#### 📘 정의
+**하위 질의(서브쿼리)**는 하나의 SQL 문 안에 포함되어 있는 또 다른 SQL 문으로, **메인 쿼리의 조건이나 컬럼 값으로 사용**되어 더 복잡한 검색을 가능하게 한다.
+
+#### 🧩 기본 구문
+```sql
+-- WHERE 절에서 사용
+SELECT 컬럼명 
+FROM 테이블명 
+WHERE 컬럼명 연산자 (SELECT 컬럼명 FROM 테이블명 WHERE 조건);
+
+-- SELECT 절에서 사용
+SELECT 컬럼명, (SELECT 컬럼명 FROM 테이블명 WHERE 조건) AS 별칭
+FROM 테이블명;
+
+-- FROM 절에서 사용
+SELECT 컬럼명 
+FROM (SELECT 컬럼명 FROM 테이블명 WHERE 조건) AS 별칭;
+```
+
+#### 🧩 서브쿼리 종류
+
+| 종류 | 위치 | 설명 | 예시 |
+|------|------|------|------|
+| **스칼라 서브쿼리** | SELECT 절 | 단일 값 반환 | SELECT (SELECT COUNT(*) FROM 학과) |
+| **인라인 뷰** | FROM 절 | 가상 테이블 역할 | FROM (SELECT * FROM 학생) |
+| **중첩 서브쿼리** | WHERE 절 | 조건으로 사용 | WHERE 학과 = (SELECT...) |
+
+#### 🧩 반환 값에 따른 분류
+
+| 분류 | 반환 값 | 사용 연산자 | 예시 |
+|------|---------|-------------|------|
+| **단일행 서브쿼리** | 1개 행, 1개 컬럼 | =, <>, >, <, >=, <= | WHERE 평점 = (SELECT MAX(평점)...) |
+| **다중행 서브쿼리** | 여러 행, 1개 컬럼 | IN, ANY, ALL, EXISTS | WHERE 학과 IN (SELECT 학과...) |
+| **다중컬럼 서브쿼리** | 여러 행, 여러 컬럼 | IN, EXISTS | WHERE (학과, 학년) IN (SELECT...) |
+
+#### 🧩 다중행 서브쿼리 연산자
+
+| 연산자 | 의미 | 예시 |
+|--------|------|------|
+| **IN** | 목록 중 하나와 일치 | WHERE 학과 IN (SELECT...) |
+| **ANY (SOME)** | 목록 중 하나라도 만족 | WHERE 평점 > ANY (SELECT...) |
+| **ALL** | 목록의 모든 값과 만족 | WHERE 평점 > ALL (SELECT...) |
+| **EXISTS** | 서브쿼리 결과가 존재 | WHERE EXISTS (SELECT...) |
+
+#### 🧩 실제 예시
+```sql
+-- 1. 단일행 서브쿼리
+-- 평점이 가장 높은 학생 조회
+SELECT * FROM 학생 
+WHERE 평점 = (SELECT MAX(평점) FROM 학생);
+
+-- 평균 평점보다 높은 학생들 조회
+SELECT * FROM 학생 
+WHERE 평점 > (SELECT AVG(평점) FROM 학생);
+
+-- 2. 다중행 서브쿼리 - IN
+-- 컴퓨터공학과나 전자공학과 학생들 조회
+SELECT * FROM 학생 
+WHERE 학과 IN (SELECT 학과명 FROM 학과 WHERE 단과대학 = '공과대학');
+
+-- 3. 다중행 서브쿼리 - ANY
+-- 1학년 학생 중 누구보다 평점이 높은 상급생 조회
+SELECT * FROM 학생 
+WHERE 학년 > 1 AND 평점 > ANY (SELECT 평점 FROM 학생 WHERE 학년 = 1);
+
+-- 4. 다중행 서브쿼리 - ALL
+-- 모든 1학년 학생보다 평점이 높은 상급생 조회
+SELECT * FROM 학생 
+WHERE 학년 > 1 AND 평점 > ALL (SELECT 평점 FROM 학생 WHERE 학년 = 1);
+
+-- 5. EXISTS 서브쿼리
+-- 수강 신청한 학생들만 조회
+SELECT * FROM 학생 s
+WHERE EXISTS (SELECT 1 FROM 수강신청 WHERE 학번 = s.학번);
+
+-- 6. 스칼라 서브쿼리 (SELECT 절)
+-- 학생과 함께 해당 학과의 총 학생 수 조회
+SELECT 학번, 이름, 학과, 
+       (SELECT COUNT(*) FROM 학생 s2 WHERE s2.학과 = s1.학과) AS 학과별학생수
+FROM 학생 s1;
+
+-- 7. 인라인 뷰 (FROM 절)
+-- 각 학과별 평균 평점이 3.5 이상인 학과의 학생들 조회
+SELECT * FROM 학생 
+WHERE 학과 IN (
+    SELECT 학과 
+    FROM (SELECT 학과, AVG(평점) AS 평균평점 FROM 학생 GROUP BY 학과) AS 학과평균
+    WHERE 평균평점 >= 3.5
+);
+```
+
+#### 🧩 상관 서브쿼리
+```sql
+-- 상관 서브쿼리: 메인 쿼리의 값을 참조
+-- 자신의 학과에서 평점이 가장 높은 학생들 조회
+SELECT * FROM 학생 s1
+WHERE 평점 = (SELECT MAX(평점) FROM 학생 s2 WHERE s2.학과 = s1.학과);
+
+-- 자신보다 평점이 높은 동기가 3명 이상인 학생 조회
+SELECT * FROM 학생 s1
+WHERE (SELECT COUNT(*) FROM 학생 s2 
+        WHERE s2.입학년도 = s1.입학년도 AND s2.평점 > s1.평점) >= 3;
+```
+
+#### 🧩 서브쿼리 주의사항
+- **단일행 서브쿼리**: 반드시 1개의 값만 반환해야 함
+- **NULL 처리**: 서브쿼리 결과에 NULL이 있으면 예상과 다른 결과 가능
+- **성능**: 중첩이 깊을수록 성능 저하, JOIN으로 대체 고려
+- **상관 서브쿼리**: 메인 쿼리 각 행마다 실행되어 성능 주의
+
+#### 📝 기출 포맷 예시
+- 서브쿼리의 종류와 특징을 설명하시오.
+- ANY와 ALL 연산자의 차이점은?
+- EXISTS와 IN의 차이점을 설명하시오.
+
+#### 🧠 용어 설명
+- **서브쿼리**: SQL문 내부에 포함된 또 다른 SELECT문
+- **상관 서브쿼리**: 메인 쿼리의 컬럼을 참조하는 서브쿼리
+- **스칼라 서브쿼리**: 단일 값을 반환하는 서브쿼리
+
+---
+
+## 🔹 248. 그룹 함수
+
+#### 📘 정의
+**그룹 함수**는 여러 행들의 집합에 대해 연산을 수행하여 **하나의 결과값을 반환**하는 함수로, 집계 함수(Aggregate Function)라고도 한다.
+
+#### 🧩 주요 그룹 함수
+
+| 함수 | 기능 | 예시 | 특징 |
+|------|------|------|------|
+| **COUNT()** | 행의 개수 | COUNT(*), COUNT(컬럼) | NULL 값 제외 (COUNT(*) 제외) |
+| **SUM()** | 합계 | SUM(급여) | 숫자형 데이터만 |
+| **AVG()** | 평균 | AVG(점수) | 숫자형 데이터만, NULL 제외 |
+| **MAX()** | 최댓값 | MAX(점수) | 모든 데이터 타입 |
+| **MIN()** | 최솟값 | MIN(점수) | 모든 데이터 타입 |
+| **STDDEV()** | 표준편차 | STDDEV(점수) | 숫자형 데이터만 |
+| **VARIANCE()** | 분산 | VARIANCE(점수) | 숫자형 데이터만 |
+
+#### 🧩 COUNT 함수 상세
+
+| 사용법 | 설명 | NULL 처리 |
+|--------|------|-----------|
+| **COUNT(\*)** | 전체 행 수 | NULL 포함 |
+| **COUNT(컬럼명)** | NULL이 아닌 값의 개수 | NULL 제외 |
+| **COUNT(DISTINCT 컬럼명)** | 중복 제거한 값의 개수 | NULL 제외 |
+
+#### 🧩 실제 예시
+```sql
+-- 학생 테이블 기준 예시
+
+-- 1. COUNT 함수
+SELECT COUNT(*) AS 총학생수 FROM 학생;                    -- 모든 학생 수
+SELECT COUNT(전화번호) AS 연락처등록학생수 FROM 학생;        -- 전화번호가 있는 학생 수
+SELECT COUNT(DISTINCT 학과) AS 학과수 FROM 학생;           -- 중복 제거한 학과 수
+
+-- 2. SUM 함수
+SELECT SUM(학점) AS 총학점 FROM 수강;                     -- 전체 취득 학점 합계
+SELECT SUM(장학금) AS 총장학금 FROM 학생;                  -- 전체 장학금 합계
+
+-- 3. AVG 함수
+SELECT AVG(평점) AS 평균평점 FROM 학생;                   -- 전체 학생 평균 평점
+SELECT AVG(점수) AS 평균점수 FROM 성적;                   -- 전체 과목 평균 점수
+
+-- 4. MAX, MIN 함수
+SELECT MAX(평점) AS 최고평점, MIN(평점) AS 최저평점 FROM 학생;
+SELECT MAX(입학일) AS 최근입학일, MIN(입학일) AS 최초입학일 FROM 학생;
+
+-- 5. 여러 함수 조합
+SELECT COUNT(*) AS 학생수,
+       AVG(평점) AS 평균평점,
+       MAX(평점) AS 최고평점,
+       MIN(평점) AS 최저평점,
+       STDDEV(평점) AS 평점표준편차
+FROM 학생;
+```
+
+#### 🧩 그룹 함수와 NULL
+
+| 함수 | NULL 처리 방식 |
+|------|----------------|
+| **COUNT(\*)** | NULL 값도 행으로 계산 |
+| **COUNT(컬럼)** | NULL 값 제외하고 계산 |
+| **SUM, AVG** | NULL 값 제외하고 계산 |
+| **MAX, MIN** | NULL 값 제외하고 계산 |
+
+```sql
+-- NULL 처리 예시
+-- 전화번호: 10명 중 3명이 NULL인 경우
+SELECT COUNT(*) AS 전체학생,           -- 결과: 10
+       COUNT(전화번호) AS 연락처보유학생  -- 결과: 7
+FROM 학생;
+```
+
+#### 🧩 DISTINCT와 그룹 함수
+```sql
+-- 중복 제거 후 집계
+SELECT COUNT(DISTINCT 학과) AS 학과수 FROM 학생;
+SELECT AVG(DISTINCT 평점) AS 고유평점평균 FROM 학생;
+SELECT SUM(DISTINCT 급여) AS 고유급여합계 FROM 교수;
+```
+
+#### 🧩 조건부 집계
+```sql
+-- CASE문을 이용한 조건부 집계
+SELECT COUNT(CASE WHEN 성별 = '남' THEN 1 END) AS 남학생수,
+       COUNT(CASE WHEN 성별 = '여' THEN 1 END) AS 여학생수,
+       COUNT(*) AS 전체학생수
+FROM 학생;
+
+-- WHERE절과 함께 사용
+SELECT AVG(평점) AS 컴공과평균평점 
+FROM 학생 
+WHERE 학과 = '컴퓨터공학과';
+```
+
+#### 🧩 그룹 함수 주의사항
+- **일반 컬럼과 함께 사용 불가**: GROUP BY 없이는 일반 컬럼과 함께 SELECT 불가
+- **중첩 불가**: 그룹 함수 안에 그룹 함수 사용 불가 (예: MAX(COUNT(*)) 불가)
+- **WHERE 절 사용 불가**: 그룹 함수는 HAVING 절에서 조건 지정
+
+```sql
+-- 잘못된 예시
+SELECT 학과, COUNT(*) FROM 학생;  -- 오류: GROUP BY 없이 일반 컬럼과 함께 사용
+
+-- 올바른 예시
+SELECT 학과, COUNT(*) FROM 학생 GROUP BY 학과;
+```
+
+#### 📝 기출 포맷 예시
+- 주요 그룹 함수의 종류와 기능을 설명하시오.
+- COUNT(*)와 COUNT(컬럼명)의 차이점은?
+- 그룹 함수 사용 시 주의사항은?
+
+#### 🧠 용어 설명
+- **그룹 함수**: 여러 행을 그룹화하여 하나의 결과를 반환하는 함수
+- **집계 함수**: 그룹 함수와 같은 의미
+- **NULL 처리**: 대부분의 그룹 함수는 NULL 값을 제외하고 계산
+
+---
+
+## 🔹 249. 그룹 지정 검색
+
+#### 📘 정의
+**그룹 지정 검색**은 **GROUP BY 절**을 사용하여 특정 컬럼의 값이 같은 행들을 하나의 그룹으로 묶고, **HAVING 절**로 그룹에 대한 조건을 지정하는 검색 방법이다.
+
+#### 🧩 기본 구문
+```sql
+SELECT 컬럼명, 그룹함수
+FROM 테이블명
+[WHERE 조건]              -- 그룹화 전 행 필터링
+GROUP BY 컬럼명           -- 그룹화 기준
+[HAVING 그룹조건]         -- 그룹화 후 그룹 필터링
+[ORDER BY 컬럼명];        -- 정렬
+```
+
+#### 🧩 GROUP BY 규칙
+- SELECT 절에 그룹 함수가 아닌 컬럼은 **반드시 GROUP BY 절에 포함**
+- GROUP BY 절에 명시된 컬럼만 SELECT 절에서 사용 가능
+- **여러 컬럼으로 그룹화** 가능
+- **NULL 값들은 하나의 그룹**으로 처리
+
+#### 🧩 WHERE vs HAVING
+
+| 구분 | WHERE | HAVING |
+|------|-------|--------|
+| **사용 시점** | 그룹화 전 | 그룹화 후 |
+| **대상** | 개별 행 | 그룹 |
+| **사용 함수** | 일반 함수 | 그룹 함수 가능 |
+| **실행 순서** | GROUP BY 전 | GROUP BY 후 |
+
+#### 🧩 실제 예시
+```sql
+-- 1. 기본 그룹화
+-- 학과별 학생 수
+SELECT 학과, COUNT(*) AS 학생수
+FROM 학생
+GROUP BY 학과;
+
+-- 2. 여러 컬럼으로 그룹화
+-- 학과별, 학년별 학생 수
+SELECT 학과, 학년, COUNT(*) AS 학생수
+FROM 학생
+GROUP BY 학과, 학년;
+
+-- 3. WHERE와 GROUP BY 함께 사용
+-- 3학년 이상 학생들의 학과별 평균 평점
+SELECT 학과, AVG(평점) AS 평균평점
+FROM 학생
+WHERE 학년 >= 3
+GROUP BY 학과;
+
+-- 4. HAVING 절 사용
+-- 학생 수가 10명 이상인 학과만 조회
+SELECT 학과, COUNT(*) AS 학생수
+FROM 학생
+GROUP BY 학과
+HAVING COUNT(*) >= 10;
+
+-- 5. WHERE와 HAVING 동시 사용
+-- 3학년 이상 학생 중에서 평균 평점이 3.5 이상인 학과
+SELECT 학과, AVG(평점) AS 평균평점
+FROM 학생
+WHERE 학년 >= 3
+GROUP BY 학과
+HAVING AVG(평점) >= 3.5;
+
+-- 6. 복잡한 그룹 조건
+-- 학과별 최고 평점이 4.0 이상이고 최저 평점이 2.0 이상인 학과
+SELECT 학과, 
+       COUNT(*) AS 학생수,
+       MAX(평점) AS 최고평점,
+       MIN(평점) AS 최저평점,
+       AVG(평점) AS 평균평점
+FROM 학생
+GROUP BY 학과
+HAVING MAX(평점) >= 4.0 AND MIN(평점) >= 2.0;
+```
+
+#### 🧩 다양한 그룹화 예시
+```sql
+-- 1. 날짜별 그룹화
+SELECT DATE(입학일) AS 입학날짜, COUNT(*) AS 입학자수
+FROM 학생
+GROUP BY DATE(입학일);
+
+-- 2. 연도별 그룹화
+SELECT YEAR(입학일) AS 입학년도, COUNT(*) AS 입학자수
+FROM 학생
+GROUP BY YEAR(입학일);
+
+-- 3. 조건별 그룹화
+SELECT 
+    CASE 
+        WHEN 평점 >= 4.0 THEN 'A등급'
+        WHEN 평점 >= 3.0 THEN 'B등급'
+        WHEN 평점 >= 2.0 THEN 'C등급'
+        ELSE 'D등급'
+    END AS 등급,
+    COUNT(*) AS 학생수
+FROM 학생
+GROUP BY 
+    CASE 
+        WHEN 평점 >= 4.0 THEN 'A등급'
+        WHEN 평점 >= 3.0 THEN 'B등급'
+        WHEN 평점 >= 2.0 THEN 'C등급'
+        ELSE 'D등급'
+    END;
+```
+
+#### 🧩 실행 순서
+```sql
+-- SQL 실행 순서
+SELECT 학과, AVG(평점) AS 평균평점      -- 5. 결과 선택
+FROM 학생                              -- 1. 테이블 선택
+WHERE 학년 >= 2                        -- 2. 행 필터링
+GROUP BY 학과                          -- 3. 그룹화
+HAVING AVG(평점) >= 3.0                -- 4. 그룹 필터링
+ORDER BY 평균평점 DESC;                -- 6. 정렬
+```
+
+#### 🧩 NULL 값 처리
+```sql
+-- NULL 값들은 하나의 그룹으로 처리됨
+SELECT 전화번호, COUNT(*) AS 학생수
+FROM 학생
+GROUP BY 전화번호;
+-- 전화번호가 NULL인 학생들은 모두 한 그룹으로 계산됨
+
+-- NULL 값 제외하고 그룹화
+SELECT 전화번호, COUNT(*) AS 학생수
+FROM 학생
+WHERE 전화번호 IS NOT NULL
+GROUP BY 전화번호;
+```
+
+#### 🧩 주의사항
+- **SELECT 절 제약**: 그룹 함수가 아닌 컬럼은 GROUP BY에 포함 필요
+- **ORDER BY 주의**: GROUP BY 컬럼이나 그룹 함수만 사용 가능
+- **성능 고려**: 인덱스가 있는 컬럼으로 그룹화하면 성능 향상
+
+#### 📝 기출 포맷 예시
+- GROUP BY와 HAVING의 차이점을 설명하시오.
+- WHERE와 HAVING 절의 실행 순서는?
+- 그룹화 시 SELECT 절 사용 규칙은?
+
+#### 🧠 용어 설명
+- **GROUP BY**: 지정된 컬럼 값이 같은 행들을 그룹화
+- **HAVING**: 그룹화된 결과에 조건을 적용
+- **그룹화**: 같은 값을 가진 행들을 하나로 묶는 작업
+
+---
+
+## 🔹 250. 집합 연산자를 이용한 통합 질의
+
+#### 📘 정의
+**집합 연산자**는 두 개 이상의 SELECT 문의 결과를 하나로 결합하여 **통합된 결과 집합**을 만드는 연산자로, 관계 대수의 집합 연산을 SQL에서 구현한 것이다.
+
+#### 🧩 집합 연산자 종류
+
+| 연산자 | 기능 | 중복 처리 | 예시 |
+|--------|------|-----------|------|
+| **UNION** | 합집합 (중복 제거) | 제거 | SELECT ... UNION SELECT ... |
+| **UNION ALL** | 합집합 (중복 포함) | 포함 | SELECT ... UNION ALL SELECT ... |
+| **INTERSECT** | 교집합 | 제거 | SELECT ... INTERSECT SELECT ... |
+| **EXCEPT (MINUS)** | 차집합 | 제거 | SELECT ... EXCEPT SELECT ... |
+
+#### 🧩 기본 구문
+```sql
+SELECT 컬럼1, 컬럼2, ...
+FROM 테이블1
+[WHERE 조건1]
+
+집합연산자
+
+SELECT 컬럼1, 컬럼2, ...
+FROM 테이블2
+[WHERE 조건2]
+[ORDER BY 컬럼명];
+```
+
+#### 🧩 집합 연산자 사용 규칙
+- **컬럼 수 일치**: 두 SELECT 문의 컬럼 개수가 같아야 함
+- **데이터 타입 호환**: 같은 위치의 컬럼끼리 데이터 타입이 호환되어야 함
+- **ORDER BY 위치**: 마지막 SELECT 문 뒤에만 사용 가능
+- **컬럼명**: 첫 번째 SELECT 문의 컬럼명 사용
+
+#### 🧩 UNION vs UNION ALL
+
+| 구분 | UNION | UNION ALL |
+|------|-------|-----------|
+| **중복 처리** | 중복 행 제거 | 중복 행 포함 |
+| **성능** | 느림 (중복 검사) | 빠름 |
+| **사용 시점** | 중복 제거 필요 시 | 모든 결과 필요 시 |
+
+#### 🧩 실제 예시
+```sql
+-- 1. UNION (합집합 - 중복 제거)
+-- 2020년 또는 2021년 입학생 조회
+SELECT 학번, 이름, 입학년도 FROM 학생 WHERE 입학년도 = 2020
+UNION
+SELECT 학번, 이름, 입학년도 FROM 학생 WHERE 입학년도 = 2021;
+
+-- 2. UNION ALL (합집합 - 중복 포함)
+-- 컴퓨터공학과 학생과 우수 학생 모두 조회 (중복 포함)
+SELECT 학번, 이름, '컴공과' AS 구분 FROM 학생 WHERE 학과 = '컴퓨터공학과'
+UNION ALL
+SELECT 학번, 이름, '우수학생' AS 구분 FROM 학생 WHERE 평점 >= 4.0;
+
+-- 3. INTERSECT (교집합)
+-- 컴퓨터공학과이면서 평점이 3.5 이상인 학생
+SELECT 학번, 이름 FROM 학생 WHERE 학과 = '컴퓨터공학과'
+INTERSECT
+SELECT 학번, 이름 FROM 학생 WHERE 평점 >= 3.5;
+
+-- 4. EXCEPT/MINUS (차집합)
+-- 전체 학생 중 수강신청하지 않은 학생
+SELECT 학번, 이름 FROM 학생
+EXCEPT
+SELECT 학번, 이름 FROM 학생 WHERE 학번 IN (SELECT 학번 FROM 수강신청);
+```
+
+#### 🧩 복잡한 집합 연산
+```sql
+-- 1. 여러 테이블의 통합 조회
+-- 학생, 교수, 직원의 연락처 통합 조회
+SELECT 이름, 전화번호, '학생' AS 구분 FROM 학생 WHERE 전화번호 IS NOT NULL
+UNION
+SELECT 이름, 전화번호, '교수' AS 구분 FROM 교수 WHERE 전화번호 IS NOT NULL
+UNION
+SELECT 이름, 전화번호, '직원' AS 구분 FROM 직원 WHERE 전화번호 IS NOT NULL
+ORDER BY 이름;
+
+-- 2. 집합 연산 중첩
+-- (A UNION B) INTERSECT C
+SELECT 학번 FROM 학생 WHERE 학과 = '컴퓨터공학과'
+UNION
+SELECT 학번 FROM 학생 WHERE 평점 >= 4.0
+INTERSECT
+SELECT 학번 FROM 수강신청 WHERE 년도 = 2024;
+
+-- 3. 서브쿼리와 집합 연산
+SELECT * FROM 학생 
+WHERE 학번 IN (
+    SELECT 학번 FROM 성적 WHERE 점수 >= 90
+    UNION
+    SELECT 학번 FROM 장학생 WHERE 년도 = 2024
+);
+```
+
+#### 🧩 집합 연산자 우선순위
+```sql
+-- 괄호를 사용한 우선순위 조정
+(SELECT 학번 FROM 학생 WHERE 학과 = '컴공'
+ UNION
+ SELECT 학번 FROM 학생 WHERE 평점 >= 4.0)
+INTERSECT
+SELECT 학번 FROM 수강신청;
+
+-- vs.
+
+SELECT 학번 FROM 학생 WHERE 학과 = '컴공'
+UNION
+(SELECT 학번 FROM 학생 WHERE 평점 >= 4.0
+ INTERSECT
+ SELECT 학번 FROM 수강신청);
+```
+
+#### 🧩 성능 고려사항
+
+| 연산자 | 성능 특성 | 권장사항 |
+|--------|-----------|----------|
+| **UNION** | 중복 제거로 인한 오버헤드 | 중복이 없다면 UNION ALL 사용 |
+| **UNION ALL** | 가장 빠름 | 가능하면 우선 고려 |
+| **INTERSECT** | JOIN으로 대체 고려 | EXISTS나 IN 사용 검토 |
+| **EXCEPT** | NOT EXISTS로 대체 고려 | 성능 테스트 후 선택 |
+
+#### 🧩 대체 방법
+```sql
+-- INTERSECT 대신 JOIN 사용
+-- 원본: INTERSECT 사용
+SELECT 학번 FROM 학생 WHERE 학과 = '컴공'
+INTERSECT
+SELECT 학번 FROM 우수학생;
+
+-- 대체: JOIN 사용
+SELECT DISTINCT s.학번 
+FROM 학생 s 
+JOIN 우수학생 u ON s.학번 = u.학번 
+WHERE s.학과 = '컴공';
+
+-- EXCEPT 대신 NOT EXISTS 사용
+-- 원본: EXCEPT 사용
+SELECT 학번 FROM 학생
+EXCEPT
+SELECT 학번 FROM 수강신청;
+
+-- 대체: NOT EXISTS 사용
+SELECT 학번 FROM 학생 s
+WHERE NOT EXISTS (SELECT 1 FROM 수강신청 WHERE 학번 = s.학번);
+```
+
+#### 🧩 집합 연산 결과 처리
+```sql
+-- 1. 집합 연산 결과를 테이블로 저장
+CREATE TABLE 통합명단 AS
+SELECT 학번, 이름, '학생' AS 구분 FROM 학생
+UNION
+SELECT 교수번호, 이름, '교수' AS 구분 FROM 교수;
+
+-- 2. 집합 연산 결과에 추가 조건 적용
+SELECT * FROM (
+    SELECT 학번, 이름, 평점 FROM 학생 WHERE 학과 = '컴공'
+    UNION
+    SELECT 학번, 이름, 평점 FROM 학생 WHERE 평점 >= 4.0
+) AS 통합결과
+WHERE 평점 >= 3.5
+ORDER BY 평점 DESC;
+
+-- 3. 집합 연산 결과 개수 계산
+SELECT COUNT(*) AS 총개수 FROM (
+    SELECT 학번 FROM 학생 WHERE 학과 = '컴공'
+    UNION
+    SELECT 학번 FROM 학생 WHERE 평점 >= 4.0
+) AS 합집합결과;
+```
+
+#### 🧩 주의사항
+- **NULL 값 처리**: 집합 연산에서 NULL 값들은 동일한 것으로 처리
+- **정렬**: ORDER BY는 전체 결과에 대해서만 적용
+- **데이터 타입**: 암시적 형변환이 가능한 타입이어야 함
+- **성능**: 대용량 데이터에서는 인덱스 활용 고려
+
+#### 📝 기출 포맷 예시
+- UNION과 UNION ALL의 차이점을 설명하시오.
+- 집합 연산자 사용 시 제약사항은?
+- INTERSECT와 JOIN의 차이점은?
+
+#### 🧠 용어 설명
+- **집합 연산자**: 두 개 이상의 SELECT 결과를 결합하는 연산자
+- **합집합**: 두 집합의 모든 원소를 포함하는 집합
+- **교집합**: 두 집합에 공통으로 포함된 원소들의 집합
+- **차집합**: 첫 번째 집합에서 두 번째 집합의 원소를 제외한 집합
