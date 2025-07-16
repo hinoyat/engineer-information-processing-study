@@ -1887,3 +1887,706 @@ SELECT COUNT(*) AS 총개수 FROM (
 - **합집합**: 두 집합의 모든 원소를 포함하는 집합
 - **교집합**: 두 집합에 공통으로 포함된 원소들의 집합
 - **차집합**: 첫 번째 집합에서 두 번째 집합의 원소를 제외한 집합
+
+---
+
+## 🔹 251. JOIN
+
+#### 📘 정의
+**JOIN**은 두 개 이상의 테이블을 **관계(외래키)를 통해 연결**하여 여러 테이블의 데이터를 함께 조회하는 방법으로, 관계형 데이터베이스의 핵심 기능이다.
+
+#### 🧩 JOIN의 필요성
+- **정규화**: 데이터 중복을 피하기 위해 테이블을 분리
+- **관계 활용**: 분리된 테이블들을 연결하여 원하는 정보 조회
+- **무결성**: 외래키 관계를 통한 데이터 일관성 보장
+
+#### 🧩 JOIN 종류
+
+| JOIN 종류 | 설명 | 특징 |
+|-----------|------|------|
+| **INNER JOIN** | 양쪽 테이블에 모두 존재하는 데이터만 | 교집합 |
+| **LEFT OUTER JOIN** | 왼쪽 테이블의 모든 데이터 + 매칭되는 오른쪽 데이터 | 왼쪽 기준 |
+| **RIGHT OUTER JOIN** | 오른쪽 테이블의 모든 데이터 + 매칭되는 왼쪽 데이터 | 오른쪽 기준 |
+| **FULL OUTER JOIN** | 양쪽 테이블의 모든 데이터 | 합집합 |
+| **CROSS JOIN** | 두 테이블의 모든 행을 조합 | 곱집합 |
+| **SELF JOIN** | 같은 테이블을 자기 자신과 조인 | 별칭 필수 |
+
+#### 🧩 기본 구문
+```sql
+-- ANSI 표준 (명시적 JOIN)
+SELECT 컬럼명
+FROM 테이블1 별칭1
+JOIN 테이블2 별칭2 ON 조인조건
+[WHERE 추가조건];
+
+-- 전통적 방식 (암시적 JOIN)
+SELECT 컬럼명
+FROM 테이블1 별칭1, 테이블2 별칭2
+WHERE 조인조건 [AND 추가조건];
+```
+
+#### 🧩 JOIN 조건
+- **동등 조인**: 컬럼 값이 같은 경우 (=)
+- **비동등 조인**: 범위나 부등호 조건 (>, <, BETWEEN)
+- **자연 조인**: 같은 이름의 컬럼으로 자동 조인
+
+#### 🧩 실제 예시
+```sql
+-- 테이블 구조 예시
+-- 학생(학번, 이름, 학과코드)
+-- 학과(학과코드, 학과명, 단과대학)
+
+-- 1. INNER JOIN (명시적)
+SELECT s.학번, s.이름, d.학과명
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드;
+
+-- 2. INNER JOIN (암시적)
+SELECT s.학번, s.이름, d.학과명
+FROM 학생 s, 학과 d
+WHERE s.학과코드 = d.학과코드;
+
+-- 3. 3개 테이블 JOIN
+-- 학생 + 학과 + 수강신청
+SELECT s.이름, d.학과명, c.과목명
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드
+JOIN 수강신청 r ON s.학번 = r.학번
+JOIN 과목 c ON r.과목코드 = c.과목코드;
+
+-- 4. JOIN과 WHERE 조건 함께
+SELECT s.이름, d.학과명
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드
+WHERE s.학년 >= 3 AND d.단과대학 = '공과대학';
+```
+
+#### 🧩 CROSS JOIN
+```sql
+-- 모든 조합 생성 (카티션 곱)
+SELECT s.이름, d.학과명
+FROM 학생 s
+CROSS JOIN 학과 d;
+
+-- 또는
+SELECT s.이름, d.학과명
+FROM 학생 s, 학과 d;
+-- 주의: WHERE 조건 없으면 CROSS JOIN과 동일
+```
+
+#### 🧩 SELF JOIN
+```sql
+-- 선후배 관계 조회 (같은 학과 내)
+SELECT s1.이름 AS 선배, s2.이름 AS 후배
+FROM 학생 s1
+JOIN 학생 s2 ON s1.학과 = s2.학과 
+WHERE s1.학년 > s2.학년;
+
+-- 조직도 조회 (상하급자 관계)
+SELECT 상급자.이름 AS 상급자, 하급자.이름 AS 하급자
+FROM 직원 상급자
+JOIN 직원 하급자 ON 상급자.직원번호 = 하급자.상급자번호;
+```
+
+#### 🧩 JOIN 성능 최적화
+- **인덱스 활용**: 조인 컬럼에 인덱스 생성
+- **조건 최적화**: WHERE 조건을 먼저 처리
+- **조인 순서**: 작은 테이블을 먼저 조인
+- **적절한 JOIN 타입**: 필요한 데이터만 조회
+
+#### 📝 기출 포맷 예시
+- JOIN의 종류와 특징을 설명하시오.
+- INNER JOIN과 OUTER JOIN의 차이점은?
+- SELF JOIN의 사용법과 예시는?
+
+#### 🧠 용어 설명
+- **JOIN**: 두 개 이상의 테이블을 연결하는 연산
+- **조인 조건**: 테이블들을 연결하는 기준 조건
+- **카티션 곱**: 두 테이블의 모든 행을 조합한 결과
+
+---
+
+## 🔹 252. EQUI JOIN
+
+#### 📘 정의
+**EQUI JOIN**은 조인 조건에서 **등호(=) 연산자**를 사용하여 두 테이블의 컬럼 값이 **정확히 일치하는 행**들만을 결합하는 가장 일반적인 조인 방법이다.
+
+#### 🧩 EQUI JOIN 특징
+- **등호 조건**: 반드시 = 연산자 사용
+- **INNER JOIN**: 기본적으로 INNER JOIN과 동일
+- **가장 일반적**: 실무에서 가장 많이 사용되는 조인
+- **외래키 관계**: 주로 기본키-외래키 관계에서 사용
+
+#### 🧩 기본 구문
+```sql
+-- ANSI 표준 방식
+SELECT 테이블1.컬럼, 테이블2.컬럼
+FROM 테이블1
+JOIN 테이블2 ON 테이블1.컬럼 = 테이블2.컬럼;
+
+-- 전통적 방식
+SELECT 테이블1.컬럼, 테이블2.컬럼
+FROM 테이블1, 테이블2
+WHERE 테이블1.컬럼 = 테이블2.컬럼;
+
+-- NATURAL JOIN (자동 EQUI JOIN)
+SELECT 컬럼1, 컬럼2
+FROM 테이블1
+NATURAL JOIN 테이블2;
+```
+
+#### 🧩 EQUI JOIN vs NON-EQUI JOIN
+
+| 구분 | EQUI JOIN | NON-EQUI JOIN |
+|------|-----------|---------------|
+| **조건** | = 연산자 | >, <, >=, <=, BETWEEN |
+| **사용 빈도** | 매우 높음 | 낮음 |
+| **예시** | 학생.학과코드 = 학과.학과코드 | 급여 BETWEEN 최소급여 AND 최대급여 |
+
+#### 🧩 실제 예시
+```sql
+-- 1. 기본 EQUI JOIN
+-- 학생과 학과 정보 함께 조회
+SELECT s.학번, s.이름, s.학과코드, d.학과명
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드;
+
+-- 2. 여러 컬럼 EQUI JOIN
+-- 학생과 성적 정보 (학번 + 과목코드로 조인)
+SELECT s.이름, g.과목코드, g.점수
+FROM 학생 s
+JOIN 성적 g ON s.학번 = g.학번;
+
+-- 3. 3개 테이블 EQUI JOIN
+-- 학생 + 수강신청 + 과목
+SELECT s.이름, c.과목명, r.신청일자
+FROM 학생 s
+JOIN 수강신청 r ON s.학번 = r.학번
+JOIN 과목 c ON r.과목코드 = c.과목코드;
+
+-- 4. NATURAL JOIN (자동 EQUI JOIN)
+-- 같은 이름의 컬럼으로 자동 조인
+SELECT 학번, 이름, 학과명
+FROM 학생
+NATURAL JOIN 학과;
+-- 주의: 학과코드 컬럼이 양쪽 테이블에 있어야 함
+
+-- 5. USING 절 사용
+SELECT s.학번, s.이름, d.학과명
+FROM 학생 s
+JOIN 학과 d USING (학과코드);
+```
+
+#### 🧩 별칭과 컬럼 지정
+```sql
+-- 별칭 사용으로 가독성 향상
+SELECT 학생.이름 AS 학생명, 
+       학과.학과명 AS 소속학과,
+       학과.단과대학 AS 소속대학
+FROM 학생
+JOIN 학과 ON 학생.학과코드 = 학과.학과코드;
+
+-- 테이블 별칭 사용
+SELECT s.이름, d.학과명, d.단과대학
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드;
+
+-- 중복 컬럼명 처리
+SELECT s.학번, s.이름, s.학과코드 AS 학생_학과코드,
+       d.학과코드 AS 학과_학과코드, d.학과명
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드;
+```
+
+#### 🧩 복잡한 EQUI JOIN 예시
+```sql
+-- 1. 조건이 있는 EQUI JOIN
+-- 공과대학 소속 3학년 이상 학생의 수강 정보
+SELECT s.이름, d.학과명, c.과목명, g.점수
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드
+JOIN 수강신청 r ON s.학번 = r.학번
+JOIN 과목 c ON r.과목코드 = c.과목코드
+JOIN 성적 g ON s.학번 = g.학번 AND c.과목코드 = g.과목코드
+WHERE d.단과대학 = '공과대학' AND s.학년 >= 3;
+
+-- 2. 그룹 함수와 EQUI JOIN
+-- 학과별 평균 점수
+SELECT d.학과명, AVG(g.점수) AS 평균점수
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드
+JOIN 성적 g ON s.학번 = g.학번
+GROUP BY d.학과명
+HAVING AVG(g.점수) >= 80;
+
+-- 3. 서브쿼리와 EQUI JOIN
+-- 평균 이상 점수를 받은 학생들의 상세 정보
+SELECT s.이름, d.학과명, g.점수
+FROM 학생 s
+JOIN 학과 d ON s.학과코드 = d.학과코드
+JOIN 성적 g ON s.학번 = g.학번
+WHERE g.점수 > (SELECT AVG(점수) FROM 성적);
+```
+
+#### 🧩 NON-EQUI JOIN 예시 (비교)
+```sql
+-- 급여 등급 테이블을 이용한 NON-EQUI JOIN
+SELECT e.이름, e.급여, s.등급
+FROM 직원 e
+JOIN 급여등급 s ON e.급여 BETWEEN s.최소급여 AND s.최대급여;
+
+-- EQUI JOIN과 NON-EQUI JOIN 비교
+-- EQUI: 정확한 일치
+-- NON-EQUI: 범위나 조건 일치
+```
+
+#### 🧩 주의사항
+- **NULL 값**: NULL과 NULL도 같지 않으므로 조인되지 않음
+- **중복 데이터**: 일대다 관계에서 데이터 중복 발생 가능
+- **성능**: 조인 컬럼에 인덱스 필요
+- **카티션 곱**: 조인 조건 누락 시 모든 조합 생성
+
+#### 📝 기출 포맷 예시
+- EQUI JOIN과 NON-EQUI JOIN의 차이점은?
+- NATURAL JOIN의 특징과 주의사항은?
+- USING 절의 사용법은?
+
+#### 🧠 용어 설명
+- **EQUI JOIN**: 등호 조건을 사용하는 조인
+- **NATURAL JOIN**: 같은 이름의 컬럼으로 자동 조인
+- **NON-EQUI JOIN**: 등호가 아닌 조건을 사용하는 조인
+
+---
+
+## 🔹 253. OUTER JOIN
+
+#### 📘 정의
+**OUTER JOIN**은 조인 조건을 만족하지 않는 행도 결과에 포함시키는 조인으로, **한쪽 테이블의 모든 데이터를 보존**하면서 다른 테이블과 조인하는 방법이다.
+
+#### 🧩 OUTER JOIN 종류
+
+| 종류 | 설명 | 키워드 |
+|------|------|--------|
+| **LEFT OUTER JOIN** | 왼쪽 테이블의 모든 행 보존 | LEFT JOIN |
+| **RIGHT OUTER JOIN** | 오른쪽 테이블의 모든 행 보존 | RIGHT JOIN |
+| **FULL OUTER JOIN** | 양쪽 테이블의 모든 행 보존 | FULL OUTER JOIN |
+
+#### 🧩 기본 구문
+```sql
+-- LEFT OUTER JOIN
+SELECT 컬럼명
+FROM 테이블1
+LEFT JOIN 테이블2 ON 조인조건;
+
+-- RIGHT OUTER JOIN  
+SELECT 컬럼명
+FROM 테이블1
+RIGHT JOIN 테이블2 ON 조인조건;
+
+-- FULL OUTER JOIN
+SELECT 컬럼명
+FROM 테이블1
+FULL OUTER JOIN 테이블2 ON 조인조건;
+```
+
+#### 🧩 INNER JOIN vs OUTER JOIN
+
+| 구분 | INNER JOIN | OUTER JOIN |
+|------|------------|------------|
+| **결과** | 양쪽 테이블에 모두 있는 데이터만 | 한쪽 테이블의 모든 데이터 + 매칭되는 데이터 |
+| **NULL 처리** | 매칭되지 않는 행 제외 | 매칭되지 않는 부분은 NULL |
+| **사용 목적** | 관련 데이터만 조회 | 전체 데이터 현황 파악 |
+
+#### 🧩 실제 예시
+```sql
+-- 테이블 예시
+-- 학생: 학번, 이름, 학과코드
+-- 수강신청: 학번, 과목코드, 신청일자
+
+-- 1. LEFT OUTER JOIN
+-- 모든 학생 + 수강신청 정보 (수강신청 안 한 학생도 포함)
+SELECT s.학번, s.이름, r.과목코드, r.신청일자
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번;
+
+-- 결과: 수강신청하지 않은 학생은 과목코드, 신청일자가 NULL
+
+-- 2. RIGHT OUTER JOIN
+-- 모든 수강신청 + 학생 정보 (학생 정보가 없는 수강신청도 포함)
+SELECT s.학번, s.이름, r.과목코드, r.신청일자
+FROM 학생 s
+RIGHT JOIN 수강신청 r ON s.학번 = r.학번;
+
+-- 결과: 학생 테이블에 없는 학번의 수강신청은 이름이 NULL
+
+-- 3. FULL OUTER JOIN
+-- 모든 학생과 모든 수강신청 정보
+SELECT s.학번, s.이름, r.과목코드, r.신청일자
+FROM 학생 s
+FULL OUTER JOIN 수강신청 r ON s.학번 = r.학번;
+
+-- 결과: 양쪽에서 매칭되지 않는 모든 데이터 포함
+```
+
+#### 🧩 실무 활용 예시
+```sql
+-- 1. 수강신청하지 않은 학생 찾기
+SELECT s.학번, s.이름
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번
+WHERE r.학번 IS NULL;
+
+-- 2. 모든 학과와 소속 학생 수 (학생이 없는 학과도 포함)
+SELECT d.학과명, COUNT(s.학번) AS 학생수
+FROM 학과 d
+LEFT JOIN 학생 s ON d.학과코드 = s.학과코드
+GROUP BY d.학과명;
+
+-- 3. 상품별 판매 현황 (판매되지 않은 상품도 포함)
+SELECT p.상품명, COALESCE(SUM(o.수량), 0) AS 총판매량
+FROM 상품 p
+LEFT JOIN 주문 o ON p.상품코드 = o.상품코드
+GROUP BY p.상품명;
+
+-- 4. 직원과 관리자 관계 (관리자가 없는 직원도 포함)
+SELECT 직원.이름 AS 직원명, 관리자.이름 AS 관리자명
+FROM 직원
+LEFT JOIN 직원 관리자 ON 직원.관리자번호 = 관리자.직원번호;
+```
+
+#### 🧩 OUTER JOIN과 NULL 처리
+```sql
+-- 1. COALESCE로 NULL 값 대체
+SELECT s.이름, COALESCE(r.과목코드, '수강신청안함') AS 수강상태
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번;
+
+-- 2. ISNULL/IFNULL로 NULL 값 대체
+SELECT s.이름, ISNULL(r.과목코드, '미신청') AS 과목
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번;
+
+-- 3. CASE문으로 NULL 값 처리
+SELECT s.이름,
+       CASE 
+           WHEN r.과목코드 IS NULL THEN '수강신청 안함'
+           ELSE r.과목코드
+       END AS 수강과목
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번;
+```
+
+#### 🧩 복잡한 OUTER JOIN
+```sql
+-- 1. 다중 테이블 OUTER JOIN
+-- 모든 학생 + 수강신청 + 성적 (일부 정보가 없어도 학생은 모두 포함)
+SELECT s.이름, r.과목코드, g.점수
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번
+LEFT JOIN 성적 g ON s.학번 = g.학번 AND r.과목코드 = g.과목코드;
+
+-- 2. OUTER JOIN + WHERE 조건
+-- 2024년 수강신청한 학생 + 신청하지 않은 모든 학생
+SELECT s.이름, r.신청일자
+FROM 학생 s
+LEFT JOIN 수강신청 r ON s.학번 = r.학번 AND r.년도 = 2024;
+
+-- 3. OUTER JOIN + 집계함수
+-- 학과별 수강신청 현황 (신청자가 없는 학과도 포함)
+SELECT d.학과명, COUNT(r.학번) AS 신청자수
+FROM 학과 d
+LEFT JOIN 학생 s ON d.학과코드 = s.학과코드
+LEFT JOIN 수강신청 r ON s.학번 = r.학번
+GROUP BY d.학과명;
+```
+
+#### 🧩 성능 고려사항
+- **인덱스**: 조인 컬럼에 인덱스 필요
+- **데이터 크기**: 큰 테이블을 LEFT에 두면 성능 저하
+- **필터링**: WHERE 조건을 ON 절에 포함할지 고려
+- **NULL 처리**: 불필요한 NULL 체크 최소화
+
+#### 📝 기출 포맷 예시
+- LEFT JOIN과 RIGHT JOIN의 차이점은?
+- OUTER JOIN에서 NULL 값이 나오는 경우는?
+- INNER JOIN과 OUTER JOIN의 결과 차이를 설명하시오.
+
+#### 🧠 용어 설명
+- **OUTER JOIN**: 조인 조건을 만족하지 않는 행도 포함하는 조인
+- **LEFT JOIN**: 왼쪽 테이블의 모든 행을 보존하는 조인
+- **NULL 보완**: 매칭되지 않는 부분을 NULL로 채우는 방식
+
+---
+
+## 🔹 254. 트리거 (Trigger)
+
+#### 📘 정의
+**트리거(Trigger)**는 데이터베이스에서 **특정 이벤트가 발생할 때 자동으로 실행**되는 저장 프로시저로, 데이터의 무결성 유지와 비즈니스 규칙 적용을 위해 사용된다.
+
+#### 🧩 트리거 특징
+- **자동 실행**: 사용자가 직접 호출하지 않음
+- **이벤트 기반**: INSERT, UPDATE, DELETE 시 실행
+- **투명성**: 애플리케이션에서 인식하지 못함
+- **무결성 보장**: 데이터 일관성 유지
+
+#### 🧩 트리거 종류
+
+| 분류 기준 | 종류 | 설명 |
+|-----------|------|------|
+| **실행 시점** | BEFORE | 이벤트 발생 전 실행 |
+|              | AFTER | 이벤트 발생 후 실행 |
+|              | INSTEAD OF | 이벤트 대신 실행 (뷰에서 사용) |
+| **이벤트** | INSERT | 행 삽입 시 |
+|           | UPDATE | 행 수정 시 |
+|           | DELETE | 행 삭제 시 |
+| **단위** | ROW TRIGGER | 각 행마다 실행 |
+|         | STATEMENT TRIGGER | 문장당 한 번 실행 |
+
+#### 🧩 기본 구문
+```sql
+-- 트리거 생성
+CREATE TRIGGER 트리거명
+{BEFORE | AFTER | INSTEAD OF} {INSERT | UPDATE | DELETE}
+ON 테이블명
+[FOR EACH ROW]
+BEGIN
+    트리거 본문
+END;
+
+-- 트리거 삭제
+DROP TRIGGER 트리거명;
+
+-- 트리거 비활성화/활성화
+ALTER TRIGGER 트리거명 DISABLE;
+ALTER TRIGGER 트리거명 ENABLE;
+```
+
+#### 🧩 트리거 내부 변수
+
+| 변수 | 설명 | 사용 시점 |
+|------|------|-----------|
+| **NEW** | 새로운 값 (삽입/수정 후) | INSERT, UPDATE |
+| **OLD** | 이전 값 (수정/삭제 전) | UPDATE, DELETE |
+
+#### 🧩 실제 예시
+```sql
+-- 1. AFTER INSERT 트리거 - 로그 기록
+CREATE TRIGGER tr_student_insert_log
+AFTER INSERT ON 학생
+FOR EACH ROW
+BEGIN
+    INSERT INTO 학생로그 (학번, 이름, 작업구분, 작업일시)
+    VALUES (NEW.학번, NEW.이름, 'INSERT', NOW());
+END;
+
+-- 2. BEFORE UPDATE 트리거 - 데이터 검증
+CREATE TRIGGER tr_student_update_check
+BEFORE UPDATE ON 학생
+FOR EACH ROW
+BEGIN
+    IF NEW.평점 < 0 OR NEW.평점 > 4.5 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '평점은 0~4.5 사이여야 합니다';
+    END IF;
+END;
+
+-- 3. AFTER DELETE 트리거 - 관련 데이터 정리
+CREATE TRIGGER tr_student_delete_cleanup
+AFTER DELETE ON 학생
+FOR EACH ROW
+BEGIN
+    DELETE FROM 수강신청 WHERE 학번 = OLD.학번;
+    DELETE FROM 성적 WHERE 학번 = OLD.학번;
+    
+    INSERT INTO 삭제로그 (학번, 이름, 삭제일시)
+    VALUES (OLD.학번, OLD.이름, NOW());
+END;
+
+-- 4. 집계 테이블 유지 트리거
+CREATE TRIGGER tr_order_summary_update
+AFTER INSERT ON 주문
+FOR EACH ROW
+BEGIN
+    UPDATE 월별집계 
+    SET 주문건수 = 주문건수 + 1,
+        주문금액 = 주문금액 + NEW.금액
+    WHERE 년월 = DATE_FORMAT(NEW.주문일자, '%Y-%m');
+END;
+```
+
+#### 🧩 트리거 활용 예시
+```sql
+-- 1. 자동 순번 부여
+CREATE TRIGGER tr_auto_sequence
+BEFORE INSERT ON 게시글
+FOR EACH ROW
+BEGIN
+    IF NEW.글번호 IS NULL THEN
+        SET NEW.글번호 = (SELECT COALESCE(MAX(글번호), 0) + 1 FROM 게시글);
+    END IF;
+END;
+
+-- 2. 상태 변경 이력 관리
+CREATE TRIGGER tr_status_history
+AFTER UPDATE ON 주문
+FOR EACH ROW
+BEGIN
+    IF OLD.주문상태 <> NEW.주문상태 THEN
+        INSERT INTO 상태변경이력 (주문번호, 이전상태, 새상태, 변경일시)
+        VALUES (NEW.주문번호, OLD.주문상태, NEW.주문상태, NOW());
+    END IF;
+END;
+
+-- 3. 재고 관리
+CREATE TRIGGER tr_inventory_update
+AFTER INSERT ON 주문상세
+FOR EACH ROW
+BEGIN
+    UPDATE 상품 
+    SET 재고수량 = 재고수량 - NEW.주문수량
+    WHERE 상품코드 = NEW.상품코드;
+    
+    IF (SELECT 재고수량 FROM 상품 WHERE 상품코드 = NEW.상품코드) < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '재고가 부족합니다';
+    END IF;
+END;
+
+-- 4. 감사(Audit) 트리거
+CREATE TRIGGER tr_salary_audit
+AFTER UPDATE ON 직원
+FOR EACH ROW
+BEGIN
+    IF OLD.급여 <> NEW.급여 THEN
+        INSERT INTO 급여변경감사 (직원번호, 이전급여, 새급여, 변경자, 변경일시)
+        VALUES (NEW.직원번호, OLD.급여, NEW.급여, USER(), NOW());
+    END IF;
+END;
+```
+
+#### 🧩 트리거 제어문
+```sql
+-- 1. 조건문 사용
+CREATE TRIGGER tr_grade_validation
+BEFORE INSERT ON 성적
+FOR EACH ROW
+BEGIN
+    IF NEW.점수 < 0 OR NEW.점수 > 100 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '점수는 0~100 사이여야 합니다';
+    ELSEIF NEW.점수 >= 90 THEN
+        SET NEW.등급 = 'A';
+    ELSEIF NEW.점수 >= 80 THEN
+        SET NEW.등급 = 'B';
+    ELSEIF NEW.점수 >= 70 THEN
+        SET NEW.등급 = 'C';
+    ELSE
+        SET NEW.등급 = 'F';
+    END IF;
+END;
+
+-- 2. 변수 사용
+CREATE TRIGGER tr_complex_calculation
+AFTER INSERT ON 주문
+FOR EACH ROW
+BEGIN
+    DECLARE discount_rate DECIMAL(3,2) DEFAULT 0.00;
+    DECLARE final_amount DECIMAL(10,2);
+    
+    -- 할인율 계산
+    IF NEW.주문금액 >= 100000 THEN
+        SET discount_rate = 0.10;
+    ELSEIF NEW.주문금액 >= 50000 THEN
+        SET discount_rate = 0.05;
+    END IF;
+    
+    -- 최종 금액 계산
+    SET final_amount = NEW.주문금액 * (1 - discount_rate);
+    
+    -- 결과 저장
+    UPDATE 주문 SET 할인율 = discount_rate, 최종금액 = final_amount 
+    WHERE 주문번호 = NEW.주문번호;
+END;
+```
+
+#### 🧩 트리거 주의사항
+
+| 주의사항 | 설명 | 해결방안 |
+|----------|------|----------|
+| **성능 저하** | 모든 DML 작업 시 실행 | 최소한의 로직만 포함 |
+| **무한 루프** | 트리거 내에서 같은 테이블 수정 | 조건 검사로 방지 |
+| **디버깅 어려움** | 자동 실행으로 추적 곤란 | 로그 테이블 활용 |
+| **데이터 일관성** | 롤백 시 트리거 작업도 롤백 | 트랜잭션 단위 고려 |
+
+#### 🧩 트리거 vs 제약조건
+
+| 구분 | 트리거 | 제약조건 |
+|------|--------|----------|
+| **실행 시점** | 이벤트 발생 시 | 데이터 입력 시 |
+| **복잡도** | 복잡한 로직 가능 | 단순한 규칙만 |
+| **성능** | 상대적으로 느림 | 빠름 |
+| **유지보수** | 어려움 | 쉬움 |
+
+#### 🧩 트리거 모니터링
+```sql
+-- 1. 트리거 정보 조회
+SELECT TRIGGER_NAME, EVENT_MANIPULATION, ACTION_TIMING, TABLE_NAME
+FROM INFORMATION_SCHEMA.TRIGGERS
+WHERE TABLE_SCHEMA = 'your_database';
+
+-- 2. 트리거 실행 로그
+CREATE TABLE 트리거실행로그 (
+    로그번호 INT AUTO_INCREMENT PRIMARY KEY,
+    트리거명 VARCHAR(100),
+    테이블명 VARCHAR(100),
+    실행시간 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    실행내용 TEXT
+);
+
+-- 트리거 내에서 로그 기록
+INSERT INTO 트리거실행로그 (트리거명, 테이블명, 실행내용)
+VALUES ('tr_student_insert', '학생', CONCAT('학번: ', NEW.학번, ' 삽입'));
+```
+
+#### 🧩 대안 기술
+
+| 대안 | 설명 | 장점 | 단점 |
+|------|------|------|------|
+| **저장 프로시저** | 명시적 호출 | 제어 가능 | 수동 실행 |
+| **애플리케이션 로직** | 코드에서 처리 | 유연성 | 일관성 위험 |
+| **이벤트 스케줄러** | 정기적 실행 | 배치 처리 | 실시간 아님 |
+
+#### 🧩 트리거 성능 최적화
+```sql
+-- 1. 조건 최적화
+CREATE TRIGGER tr_optimized_update
+AFTER UPDATE ON 학생
+FOR EACH ROW
+BEGIN
+    -- 평점이 실제로 변경된 경우에만 실행
+    IF OLD.평점 <> NEW.평점 THEN
+        UPDATE 학과통계 
+        SET 평균평점 = (SELECT AVG(평점) FROM 학생 WHERE 학과 = NEW.학과)
+        WHERE 학과 = NEW.학과;
+    END IF;
+END;
+
+-- 2. 배치 처리 고려
+CREATE TRIGGER tr_batch_friendly
+AFTER INSERT ON 주문
+FOR EACH ROW
+BEGIN
+    -- 실시간 집계 대신 플래그 설정
+    UPDATE 집계상태 SET 갱신필요 = 1 WHERE 구분 = '일별주문';
+END;
+```
+
+#### 📝 기출 포맷 예시
+- 트리거의 종류와 실행 시점을 설명하시오.
+- BEFORE 트리거와 AFTER 트리거의 차이점은?
+- 트리거 사용 시 주의사항을 3가지 이상 설명하시오.
+
+#### 🧠 용어 설명
+- **트리거**: 특정 이벤트 발생 시 자동 실행되는 프로시저
+- **NEW/OLD**: 트리거에서 사용하는 행 참조 변수
+- **FOR EACH ROW**: 각 행마다 트리거 실행을 의미
+- **SIGNAL**: 트리거에서 오류를 발생시키는 명령
+
+---
