@@ -1,5 +1,3 @@
-# 키워드 암기카드 - 요구사항 확인1
-
 ## 001. 소프트웨어 생명 주기 (SDLC)
 
 - [ ] **SDLC** = Software Development Life Cycle = 소프트웨어 생명 주기
